@@ -5,7 +5,7 @@ void ScannerServoController::begin()
 {
     scannerServo.setPeriodHertz(50);
 
-    scannerServo.attache(ServoPin, MinPulseWidth, MaxpulseWigth);
+    scannerServo.attach(ServoPin, MinPulseWidth, MaxpulseWigth);
 
     faceCentre();
 }
@@ -42,7 +42,7 @@ void ScannerServoController::faceCentre()
     moveToAngle(CentreAngle);
 }
 
-int ScannerServoController::getCurrentAngle()
+int ScannerServoController::getCurrentAngle() const
 {
     return currentAngle;
 }

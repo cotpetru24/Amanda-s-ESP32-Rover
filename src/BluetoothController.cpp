@@ -2,19 +2,23 @@
 #include "BluetoothController.h"
 #include <BluetoothSerial.h>
 
-namespace {
+namespace
+{
     BluetoothSerial serialBluetooth;
 }
 
-void BluetoothController::begin(const char* deviceName) {
+void BluetoothController::begin(const char *deviceName)
+{
     serialBluetooth.begin(deviceName);
     Serial.println("Bluetooth started with device name: " + String(deviceName));
 }
 
-bool BluetoothController::hasCommand() {
+bool BluetoothController::hasCommand()
+{
     return serialBluetooth.available() > 0;
 }
 
-char BluetoothController::readCommand() {
+char BluetoothController::readCommand()
+{
     return static_cast<char>(serialBluetooth.read());
-}   
+}

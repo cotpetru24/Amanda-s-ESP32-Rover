@@ -1,6 +1,6 @@
 #pragma once
 
-class MotorController 
+class MotorController
 {
 public:
     void begin();
@@ -9,7 +9,6 @@ public:
     void driveBackward();
     void coast();
     void emergencyBrake();
-
 
     void steerLeft();
     void steerRight();

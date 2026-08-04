@@ -1,30 +1,30 @@
 #include <Arduino.h>
 #include "UltrasonicController.h"
 
-void UltrasoundController:: begin()
+void UltrasonicController::begin()
 {
-    pinMode(TriggerPin, Output);
-    pinMode(EchoPin, Input);
+    pinMode(TriggerPin, OUTPUT);
+    pinMode(EchoPin, INPUT);
 
     digitalWrite(TriggerPin, LOW);
 }
 
-fload UltrasonicController::getDistanceCentimetres()
+float UltrasonicController::getDistanceCentimetres()
 {
     digitalWrite(TriggerPin, LOW);
-    delayMicrosedonds(2);
+    delayMicroseconds(2);
 
     digitalWrite(TriggerPin, HIGH);
     delayMicroseconds(10);
 
     digitalWrite(TriggerPin, LOW);
 
-    const unsigned long pulseDuration = PulseIn(EchoPin, HIGH, EchoTimeoutMicroseconds);
-    
-    if(pulseDuration == 0)
+    const unsigned long pulseDuration = pulseIn(EchoPin, HIGH, EchoTimeoutMicroseconds);
+
+    if (pulseDuration == 0)
     {
         return -1.0f;
     }
 
-    return pulseDuration * 0.0343f/2.0f;
+    return pulseDuration * 0.0343f / 2.0f;
 }
