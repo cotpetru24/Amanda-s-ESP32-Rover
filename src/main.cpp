@@ -2,11 +2,14 @@
 
 #include "BluetoothController.h"
 #include "MotorController.h"
+#include "UltrasonicController.h"
+#include "ScannerServoController.h"
+#include "NavigationController.h"
+#include "StartButtonController.h"
 #include "ObstacleSensorController.h"
 
 BluetoothController bluetoothController;
 MotorController motorController;
-ObstacleSensorController obstacleSensorController;
 
 
 void processCommand(char command) {
@@ -40,54 +43,102 @@ void processCommand(char command) {
             Serial.println("Centering steering");
             break;
 
-        default:
-            Serial.print("Unknown command: ");
-            Serial.println(command);
+    default:
+        Serial.print("Unknown command: ");
+        Serial.println(command);
     }
 }
 
-void enforceObstacleSafety()
-{
-    const DriveState driveState = motorController.getDriveState();
 
-    if(driveState == DriveState::Forward && obstacleSensorController.isFrontObstacleDetected())
-    {
-        motorController.emergencyBrake();
-        Serial.println("EMERGENCY STOP: front obstacle");
-        return;
-    }
-
-    if(driveState == DriveState::Reverse && obstacleSensorController.isBackObstacleDetected())
-    {
-        motorController.emergencyBrake();
-        Serial.println("EMERGENCY STOP: rear obstacle");
-        return;
-    }
-
-}
 
 void setup() {
    Serial.begin(115200);
 
+    startButtonController.begin();
+    ultrasonicController.begin();
     motorController.begin();
-    obstacleSensorController.begin();
     bluetoothController.begin("Amanda-Rover");
-
     Serial.println("Amanda Rover ready");
 }
 
 void loop() {
-  if(bluetoothController.hasCommand()) 
-  {
-    const char command = bluetoothController.readCommand();
-    Serial.print("Command received: ");
-    Serial.println(command);
-    
-    processCommand(command);
+  if(!bluetoothController.hasCommand()) {
+    return;
   }
 
-  enforceObstacleSafety();
-
+  const char command = bluetoothController.readCommand();
+  Serial.print("Command received: ");
+  Serial.println(command);
+  
+  processCommand(command);
 }
 
+    updateAutonomousCountdown();
 
+    if (!canStart)
+        return;
+
+    navigationController.update();
+
+    static unsigned long lastMeasuredTime = 0;
+
+    // after debugging change to 40ms
+    if (!navigationController.isScanning() && millis() - lastMeasuredTime >= 250)
+    {
+        lastMeasuredTime = millis();
+        const float distance = ultrasonicController.getDistanceCentimetres();
+
+        Serial.print("Distance:");
+
+        if (distance < 0)
+        {
+            Serial.println("No Echo");
+        }
+        else
+        {
+            Serial.print(distance);
+            Serial.println(" cm");
+        }
+    }
+
+    static bool scanResultsPrinted = false;
+    if (navigationController.isScanComplete() && !scanResultsPrinted)
+    {
+        scanResultsPrinted = true;
+
+        const ScanResult result = navigationController.getScanResult();
+
+        Serial.print("Left: ");
+        Serial.print(result.leftDistance);
+        Serial.println(" cm");
+
+        Serial.print("Front: ");
+        Serial.print(result.frontDistance);
+        Serial.println(" cm");
+
+        Serial.print("Right: ");
+        Serial.print(result.rightDistance);
+        Serial.println(" cm");
+
+        const NavigationDirection bestDirection = navigationController.getBestDirection();
+
+        switch (bestDirection)
+        {
+        case NavigationDirection::Left:
+            Serial.println("Best direction: LEFT");
+            break;
+
+        case NavigationDirection::Front:
+            Serial.println("Best direction: FRONT");
+            break;
+
+        case NavigationDirection::Right:
+            Serial.println("Best direction: RIGHT");
+            break;
+
+        case NavigationDirection::None:
+            Serial.println("Best direction: NONE");
+            break;
+        }
+    }
+}

@@ -1,8 +1,9 @@
 #pragma once
 
-class BluetoothController {
+class BluetoothController
+{
 public:
-    void begin(const char* deviceName);
+    void begin(const char *deviceName);
     bool hasCommand();
     char readCommand();
 };
