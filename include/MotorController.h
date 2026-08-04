@@ -20,6 +20,7 @@ public:
     void steerLeft();
     void steerRight();
     void centerSteering();
+    void updateSteering();
 
     DriveState getDriveState() const;
 
@@ -33,4 +34,9 @@ private:
     static constexpr int SteeringInput1Pin = 32;
     static constexpr int SteeringInput2Pin = 33;
     static constexpr int SteeringEnablePin = 14;
+
+    static constexpr unsigned long SteeringPulseTimeMs = 200;
+    
+    bool steeringActive = false;
+    unsigned long steeringStartedAt = 0;
 };

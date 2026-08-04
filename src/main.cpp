@@ -145,8 +145,7 @@ void enforceObstacleSafety()
 
     if (
         driveState == DriveState::Forward &&
-        obstacleSensorController.isFrontObstacleDetected()
-    )
+        obstacleSensorController.isFrontObstacleDetected())
     {
         motorController.emergencyBrake();
         Serial.println("Emergency stop: front obstacle");
@@ -155,8 +154,7 @@ void enforceObstacleSafety()
 
     if (
         driveState == DriveState::Reverse &&
-        obstacleSensorController.isRearObstacleDetected()
-    )
+        obstacleSensorController.isRearObstacleDetected())
     {
         motorController.emergencyBrake();
         Serial.println("Emergency stop: rear obstacle");
@@ -195,7 +193,8 @@ void loop()
 
     updateAutonomousCountdown();
     enforceObstacleSafety();
-    
+    motorController.updateSteering();
+
     if (!canStart)
         return;
 
@@ -243,23 +242,34 @@ void loop()
 
         const NavigationDirection bestDirection = navigationController.getBestDirection();
 
-        switch (bestDirection)
-        {
-        case NavigationDirection::Left:
-            Serial.println("Best direction: LEFT");
-            break;
+switch (bestDirection)
+{
+    case NavigationDirection::Left:
+        Serial.println("Best direction: LEFT");
 
-        case NavigationDirection::Front:
-            Serial.println("Best direction: FRONT");
-            break;
+        motorController.steerLeft();
+        motorController.driveForward();
+        break;
 
-        case NavigationDirection::Right:
-            Serial.println("Best direction: RIGHT");
-            break;
+    case NavigationDirection::Front:
+        Serial.println("Best direction: FRONT");
 
-        case NavigationDirection::None:
-            Serial.println("Best direction: NONE");
-            break;
-        }
+        scannerServoController.faceFront();
+        motorController.driveForward();
+        break;
+
+    case NavigationDirection::Right:
+        Serial.println("Best direction: RIGHT");
+
+        motorController.steerRight();
+        motorController.driveForward();
+        break;
+
+    case NavigationDirection::None:
+        Serial.println("Best direction: NONE");
+
+        motorController.emergencyBrake();
+        break;
+}
     }
 }
