@@ -60,8 +60,8 @@ void MotorController::steerLeft()
     digitalWrite(SteeringInput1Pin, HIGH);
     digitalWrite(SteeringInput2Pin, LOW);
 
-    steeringActive = true;
-    steeringStartedAt = millis();
+    // steeringActive = true;
+    // steeringStartedAt = millis();
 }
 
 void MotorController::steerRight()
@@ -69,8 +69,8 @@ void MotorController::steerRight()
     digitalWrite(SteeringInput1Pin, LOW);
     digitalWrite(SteeringInput2Pin, HIGH);
 
-    steeringActive = true;
-    steeringStartedAt = millis();
+    // steeringActive = true;
+    // steeringStartedAt = millis();
 }
 
 void MotorController::centerSteering()
@@ -78,16 +78,16 @@ void MotorController::centerSteering()
     digitalWrite(SteeringInput1Pin, LOW);
     digitalWrite(SteeringInput2Pin, LOW);
 
-    steeringActive = true;
+    // steeringActive = true;
 }
 
-void MotorController::updateSteering()
-{
-    if (!steeringActive)
-        return;
+// void MotorController::updateSteering()
+// {
+//     if (!steeringActive)
+//         return;
 
-    if (millis() - steeringStartedAt >= SteeringPulseTimeMs)
-    {
-        centerSteering();
-    }
-}
+//     if (millis() - steeringStartedAt >= SteeringPulseTimeMs)
+//     {
+//         centerSteering();
+//     }
+// }

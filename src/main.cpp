@@ -193,7 +193,7 @@ void loop()
 
     updateAutonomousCountdown();
     enforceObstacleSafety();
-    motorController.updateSteering();
+    // motorController.updateSteering();
 
     if (!canStart)
         return;
