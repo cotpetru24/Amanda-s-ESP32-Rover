@@ -4,7 +4,7 @@
 void ObstacleSensorController::begin()
 {
     pinMode(FrontSensorPin, INPUT);
-    pinMode(BackSensorPin, INPUT);
+    pinMode(RearSensorPin, INPUT);
 }
 
 bool ObstacleSensorController::isFrontObstacleDetected() const
@@ -12,12 +12,12 @@ bool ObstacleSensorController::isFrontObstacleDetected() const
     return isObstacleDetected(FrontSensorPin);
 };
 
-bool ObstacleSensorController::isBackObstacleDetected() const
+bool ObstacleSensorController::isRearObstacleDetected() const
 {
-    return isObstacleDetected(BackSensorPin);
+    return isObstacleDetected(RearSensorPin);
 };
 
 bool ObstacleSensorController::isObstacleDetected(std::uint8_t pin) const
 {
     return digitalRead(pin) == LOW;
-} 
+}

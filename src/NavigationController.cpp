@@ -13,7 +13,7 @@ void NavigationController::begin()
 
 void NavigationController::startScan()
 {
-    if (isScanning)
+    if (isScanning())
         return;
 
     result = {0.0F, 0.0F, 0.0F};
@@ -27,7 +27,7 @@ void NavigationController::startScan()
 
 void NavigationController::update()
 {
-    if (!isCurrentScanPositionSettled)
+    if (!isCurrentScanPositionSettled())
         return;
 
     switch (state)
@@ -85,7 +85,7 @@ ScanResult NavigationController::getScanResult()
 
 NavigationDirection NavigationController::getBestDirection()
 {
-    if (!isScanComplete)
+    if (!isScanComplete())
         return NavigationDirection::None;
 
     if (result.frontDistance >= result.leftDistance && result.frontDistance >= result.rightDistance)
@@ -101,7 +101,7 @@ NavigationDirection NavigationController::getBestDirection()
 
 bool NavigationController::isCurrentScanPositionSettled() const
 {
-    if (!isScanning)
+    if (!isScanning())
         return false;
 
     return millis() - stateStartedAt >= ServoSettlingTimeMs;

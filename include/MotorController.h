@@ -7,8 +7,7 @@ enum class DriveState
     Reverse
 };
 
-
-class MotorController 
+class MotorController
 {
 public:
     void begin();
@@ -26,7 +25,7 @@ public:
 
 private:
     DriveState currentDriveState = DriveState::Stopped;
-    
+
     static constexpr int DriveInput1Pin = 27;
     static constexpr int DriveInput2Pin = 26;
     static constexpr int DriveEnablePin = 25;

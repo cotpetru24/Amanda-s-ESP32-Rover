@@ -4,14 +4,14 @@
 
 class ObstacleSensorController
 {
-    public:
-        void begin();
-        bool isFrontObstacleDetected() const;
-        bool isBackObstacleDetected() const;
+public:
+    void begin();
+    bool isFrontObstacleDetected() const;
+    bool isRearObstacleDetected() const;
 
-    private:
-        static constexpr int FrontSensorPin = 18;
-        static constexpr int BackSensorPin = 19;
+private:
+    static constexpr int FrontSensorPin = 18;
+    static constexpr int RearSensorPin = 19;
 
-        bool isObstacleDetected(std::uint8_t) const;
+    bool isObstacleDetected(std::uint8_t) const;
 };

@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include "BluetoothController.h"
 #include "MotorController.h"
 #include "UltrasonicController.h"
@@ -10,38 +9,129 @@
 
 BluetoothController bluetoothController;
 MotorController motorController;
+ObstacleSensorController obstacleSensorController;
+UltrasonicController ultrasonicController;
+ScannerServoController scannerServoController;
+NavigationController navigationController(scannerServoController, ultrasonicController);
+StartButtonController startButtonController;
 
+// Rover state
+bool canStart = false;
+bool autonomousCountdownActive = false;
+unsigned long autonomousCountdownStartedAt = 0;
 
-void processCommand(char command) {
-    switch (command) {
-        case 'F':
-            motorController.driveForward();
-            Serial.println("Driving forward");
-            break;
-        case 'B':
-            motorController.driveBackward();
-            Serial.println("Driving backward");
-            break;
-        case 'N':
-            motorController.coast();
-            Serial.println("Coasting");
-            break;
-        case 'E':
-            motorController.emergencyBrake();
-            Serial.println("Emergency brake activated");
-            break;
-        case 'L':
-            motorController.steerLeft();
-            Serial.println("Steering left");
-            break;
-        case 'R':
-            motorController.steerRight();
-            Serial.println("Steering right");
-            break;
-        case 'C':
-            motorController.centerSteering();
-            Serial.println("Centering steering");
-            break;
+static constexpr unsigned long AutonomousStartDelayMs = 5000;
+
+void stopRover()
+{
+    canStart = false;
+    autonomousCountdownActive = false;
+
+    motorController.emergencyBrake();
+
+    // not sure we need this!!!
+    motorController.centerSteering();
+
+    Serial.println("Rover Stopped");
+}
+
+void startAutonomousCountdown()
+{
+    autonomousCountdownActive = true;
+    autonomousCountdownStartedAt = millis();
+
+    motorController.emergencyBrake();
+    // not sure if we need this
+    motorController.centerSteering();
+
+    Serial.println("Autonomous mode starts in 5 seconds");
+}
+
+void updateAutonomousCountdown()
+{
+    if (!autonomousCountdownActive)
+        return;
+
+    if (millis() - autonomousCountdownStartedAt < AutonomousStartDelayMs)
+        return;
+
+    autonomousCountdownActive = false;
+    canStart = true;
+    navigationController.startScan();
+
+    Serial.println("Autonomous mode enabled");
+}
+
+void handleStartButton()
+{
+    startButtonController.update();
+
+    if (!startButtonController.wasPressed())
+        return;
+
+    if (canStart || autonomousCountdownActive)
+    {
+        stopRover();
+        return;
+    }
+
+    startAutonomousCountdown();
+}
+
+void processCommand(char command)
+{
+    switch (command)
+    {
+    case 'F':
+        canStart = true;
+        autonomousCountdownActive = false;
+
+        scannerServoController.faceFront();
+        motorController.driveForward();
+        Serial.println("Driving forward");
+        break;
+
+    case 'B':
+        canStart = true;
+        autonomousCountdownActive = false;
+
+        scannerServoController.faceRear();
+        motorController.driveBackward();
+        Serial.println("Driving backward");
+        break;
+
+    case 'N':
+        motorController.coast();
+        Serial.println("Coasting");
+        break;
+
+    case 'E':
+        stopRover();
+        Serial.println("Emergency brake activated");
+        break;
+
+    case 'L':
+        canStart = true;
+        autonomousCountdownActive = false;
+
+        scannerServoController.faceLeft();
+        motorController.steerLeft();
+        Serial.println("Steering left");
+        break;
+
+    case 'R':
+        canStart = true;
+        autonomousCountdownActive = false;
+
+        scannerServoController.faceRight();
+        motorController.steerRight();
+        Serial.println("Steering right");
+        break;
+
+    case 'C':
+        motorController.centerSteering();
+        Serial.println("Centering steering");
+        break;
 
     default:
         Serial.print("Unknown command: ");
@@ -49,32 +139,63 @@ void processCommand(char command) {
     }
 }
 
+void enforceObstacleSafety()
+{
+    const DriveState driveState = motorController.getDriveState();
 
+    if (
+        driveState == DriveState::Forward &&
+        obstacleSensorController.isFrontObstacleDetected()
+    )
+    {
+        motorController.emergencyBrake();
+        Serial.println("Emergency stop: front obstacle");
+        return;
+    }
 
-void setup() {
-   Serial.begin(115200);
+    if (
+        driveState == DriveState::Reverse &&
+        obstacleSensorController.isRearObstacleDetected()
+    )
+    {
+        motorController.emergencyBrake();
+        Serial.println("Emergency stop: rear obstacle");
+    }
+}
+
+void setup()
+{
+    Serial.begin(115200);
 
     startButtonController.begin();
+    obstacleSensorController.begin();
     ultrasonicController.begin();
     motorController.begin();
+    scannerServoController.begin();
+    navigationController.begin();
+
     bluetoothController.begin("Amanda-Rover");
+
+    stopRover();
     Serial.println("Amanda Rover ready");
 }
 
-void loop() {
-  if(!bluetoothController.hasCommand()) {
-    return;
-  }
+void loop()
+{
+    handleStartButton();
 
-  const char command = bluetoothController.readCommand();
-  Serial.print("Command received: ");
-  Serial.println(command);
-  
-  processCommand(command);
-}
+    if (bluetoothController.hasCommand())
+    {
+        const char command = bluetoothController.readCommand();
+        Serial.print("Command received: ");
+        Serial.println(command);
+
+        processCommand(command);
+    }
 
     updateAutonomousCountdown();
-
+    enforceObstacleSafety();
+    
     if (!canStart)
         return;
 
