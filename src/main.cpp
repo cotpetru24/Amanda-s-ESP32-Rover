@@ -1,9 +1,12 @@
 #include <Arduino.h>
+
 #include "BluetoothController.h"
 #include "MotorController.h"
+#include "ObstacleSensorController.h"
 
 BluetoothController bluetoothController;
 MotorController motorController;
+ObstacleSensorController obstacleSensorController;
 
 
 void processCommand(char command) {
@@ -43,26 +46,48 @@ void processCommand(char command) {
     }
 }
 
+void enforceObstacleSafety()
+{
+    const DriveState driveState = motorController.getDriveState();
 
+    if(driveState == DriveState::Forward && obstacleSensorController.isFrontObstacleDetected())
+    {
+        motorController.emergencyBrake();
+        Serial.println("EMERGENCY STOP: front obstacle");
+        return;
+    }
+
+    if(driveState == DriveState::Reverse && obstacleSensorController.isBackObstacleDetected())
+    {
+        motorController.emergencyBrake();
+        Serial.println("EMERGENCY STOP: rear obstacle");
+        return;
+    }
+
+}
 
 void setup() {
    Serial.begin(115200);
 
     motorController.begin();
+    obstacleSensorController.begin();
     bluetoothController.begin("Amanda-Rover");
+
     Serial.println("Amanda Rover ready");
 }
 
 void loop() {
-  if(!bluetoothController.hasCommand()) {
-    return;
+  if(bluetoothController.hasCommand()) 
+  {
+    const char command = bluetoothController.readCommand();
+    Serial.print("Command received: ");
+    Serial.println(command);
+    
+    processCommand(command);
   }
 
-  const char command = bluetoothController.readCommand();
-  Serial.print("Command received: ");
-  Serial.println(command);
-  
-  processCommand(command);
+  enforceObstacleSafety();
+
 }
 
 

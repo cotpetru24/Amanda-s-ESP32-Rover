@@ -1,5 +1,13 @@
 #pragma once
 
+enum class DriveState
+{
+    Stopped,
+    Forward,
+    Reverse
+};
+
+
 class MotorController 
 {
 public:
@@ -15,7 +23,11 @@ public:
     void steerRight();
     void centerSteering();
 
+    DriveState getDriveState() const;
+
 private:
+    DriveState currentDriveState = DriveState::Stopped;
+    
     static constexpr int DriveInput1Pin = 27;
     static constexpr int DriveInput2Pin = 26;
     static constexpr int DriveEnablePin = 25;
