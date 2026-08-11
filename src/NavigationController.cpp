@@ -54,6 +54,12 @@ void NavigationController::update()
         result.rightDistance = measureDistance();
 
         scannerServo.faceFront();
+        state = ScanState::WaitingForReturnToFront;
+        stateStartedAt = millis();
+
+        break;
+
+    case ScanState::WaitingForReturnToFront:
         state = ScanState::Complete;
 
         Serial.println("Navigation scan complete");
@@ -70,7 +76,8 @@ bool NavigationController::isScanning() const
 {
     return state == ScanState::WaitingForRight ||
            state == ScanState::WaitingForLeft ||
-           state == ScanState::WaitingForFront;
+           state == ScanState::WaitingForFront ||
+           state == ScanState::WaitingForReturnToFront;
 }
 
 bool NavigationController::isScanComplete() const
@@ -87,6 +94,13 @@ NavigationDirection NavigationController::getBestDirection()
 {
     if (!isScanComplete())
         return NavigationDirection::None;
+
+    if (result.frontDistance <= STOP_DISTANCE_CM &&
+        result.leftDistance <= STOP_DISTANCE_CM &&
+        result.rightDistance <= STOP_DISTANCE_CM)
+    {
+        return NavigationDirection::None;
+    }
 
     if (result.frontDistance >= result.leftDistance && result.frontDistance >= result.rightDistance)
     {
@@ -115,4 +129,14 @@ float NavigationController::measureDistance()
         return MaximumDistanceCm;
 
     return distance;
+}
+
+bool NavigationController::isObstacleAhead(float distance) const
+{
+    return distance > 0.0F && distance <= WARNING_DISTANCE_CM;
+}
+
+bool NavigationController::isObstacleClose(float distance) const
+{
+    return distance > 0.0F && distance <= STOP_DISTANCE_CM;
 }

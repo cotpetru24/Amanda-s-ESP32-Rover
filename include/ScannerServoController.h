@@ -9,7 +9,6 @@ public:
     void moveToAngle(int angle);
 
     void faceFront();
-    void faceRear();
     void faceLeft();
     void faceRight();
     void faceCentre();
@@ -19,7 +18,6 @@ public:
 private:
     static constexpr int ServoPin = 13;
 
-    static constexpr int RearAngle = 10;
     static constexpr int LeftAngle = 45;
     static constexpr int CentreAngle = 90;
     static constexpr int RightAngle = 135;

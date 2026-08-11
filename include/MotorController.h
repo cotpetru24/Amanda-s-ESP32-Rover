@@ -1,42 +1,73 @@
 #pragma once
 
-enum class DriveState
-{
-    Stopped,
-    Forward,
-    Reverse
-};
+#include <Arduino.h>
 
 class MotorController
 {
 public:
+
     void begin();
 
     void driveForward();
     void driveBackward();
-    void coast();
-    void emergencyBrake();
 
     void steerLeft();
     void steerRight();
     void centerSteering();
-    // void updateSteering();
 
-    DriveState getDriveState() const;
+    void coast();
+    void emergencyBrake();
+
+    void setDriveSpeed(uint8_t speed);
 
 private:
-    DriveState currentDriveState = DriveState::Stopped;
+    enum class DriveDirection
+    {
+        Neutral,
+        Forward,
+        Backward
+    };
 
-    static constexpr int DriveInput1Pin = 27;
-    static constexpr int DriveInput2Pin = 26;
-    static constexpr int DriveEnablePin = 25;
+    enum class SteeringDirection
+    {
+        Center,
+        Left,
+        Right
+    };
 
-    static constexpr int SteeringInput1Pin = 32;
-    static constexpr int SteeringInput2Pin = 33;
-    static constexpr int SteeringEnablePin = 14;
+    static constexpr int LeftInput1Pin = 27;
+    static constexpr int LeftInput2Pin = 26;
+    static constexpr int LeftEnablePin = 25;
 
-    // static constexpr unsigned long SteeringPulseTimeMs = 800;
-    
-    // bool steeringActive = false;
-    // unsigned long steeringStartedAt = 0;
+    static constexpr int RightInput1Pin = 32;
+    static constexpr int RightInput2Pin = 33;
+    static constexpr int RightEnablePin = 14;
+
+    static constexpr bool LeftMotorReversed = false;
+    static constexpr bool RightMotorReversed = false;
+
+    bool leftMotorReversed;
+    bool rightMotorReversed;
+
+    uint8_t driveSpeed = 200;
+
+    DriveDirection driveDirection = DriveDirection::Neutral;
+    SteeringDirection steeringDirection = SteeringDirection::Center;
+
+    void applyMovement();
+
+    void setLeftMotor(int16_t speed);
+    void setRightMotor(int16_t speed);
+
+    void setMotor(
+        uint8_t in1Pin,
+        uint8_t in2Pin,
+        uint8_t enablePin,
+        int16_t speed,
+        bool reversed);
+
+    void brakeMotor(
+        uint8_t in1Pin,
+        uint8_t in2Pin,
+        uint8_t enablePin);
 };

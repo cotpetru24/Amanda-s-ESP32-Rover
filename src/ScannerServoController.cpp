@@ -22,10 +22,6 @@ void ScannerServoController::faceFront()
     moveToAngle(FrontAngle);
 }
 
-void ScannerServoController::faceRear()
-{
-    moveToAngle(RearAngle);
-}
 
 void ScannerServoController::faceRight()
 {

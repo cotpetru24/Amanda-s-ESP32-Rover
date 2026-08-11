@@ -1,93 +1,189 @@
-#include <Arduino.h>
 #include "MotorController.h"
 
 void MotorController::begin()
 {
-    pinMode(DriveInput1Pin, OUTPUT);
-    pinMode(DriveInput2Pin, OUTPUT);
-    pinMode(DriveEnablePin, OUTPUT);
+    pinMode(LeftInput1Pin, OUTPUT);
+    pinMode(LeftInput2Pin, OUTPUT);
+    pinMode(LeftEnablePin, OUTPUT);
 
-    pinMode(SteeringInput1Pin, OUTPUT);
-    pinMode(SteeringInput2Pin, OUTPUT);
-    pinMode(SteeringEnablePin, OUTPUT);
+    pinMode(RightInput1Pin, OUTPUT);
+    pinMode(RightInput2Pin, OUTPUT);
+    pinMode(RightEnablePin, OUTPUT);
 
-    digitalWrite(DriveEnablePin, HIGH);
-    digitalWrite(SteeringEnablePin, HIGH);
-
-    emergencyBrake(); // Ensure motors are stopped on startup
-    centerSteering(); // Ensure steering is centered on startup
+    coast();
 }
 
 void MotorController::driveForward()
 {
-    digitalWrite(DriveInput1Pin, HIGH);
-    digitalWrite(DriveInput2Pin, LOW);
+    driveDirection = DriveDirection::Forward;
+    steeringDirection = SteeringDirection::Center;
 
-    currentDriveState = DriveState::Forward;
+    applyMovement();
 }
 
 void MotorController::driveBackward()
 {
-    digitalWrite(DriveInput1Pin, LOW);
-    digitalWrite(DriveInput2Pin, HIGH);
+    driveDirection = DriveDirection::Backward;
+    steeringDirection = SteeringDirection::Center;
 
-    currentDriveState = DriveState::Reverse;
-}
-
-void MotorController::coast()
-{
-    digitalWrite(DriveInput1Pin, LOW);
-    digitalWrite(DriveInput2Pin, LOW);
-
-    currentDriveState = DriveState::Stopped;
-}
-
-void MotorController::emergencyBrake()
-{
-    digitalWrite(DriveInput1Pin, HIGH);
-    digitalWrite(DriveInput2Pin, HIGH);
-
-    currentDriveState = DriveState::Stopped;
-}
-
-DriveState MotorController::getDriveState() const
-{
-    return currentDriveState;
+    applyMovement();
 }
 
 void MotorController::steerLeft()
 {
-    digitalWrite(SteeringInput1Pin, HIGH);
-    digitalWrite(SteeringInput2Pin, LOW);
+    steeringDirection = SteeringDirection::Left;
 
-    // steeringActive = true;
-    // steeringStartedAt = millis();
+    applyMovement();
 }
 
 void MotorController::steerRight()
 {
-    digitalWrite(SteeringInput1Pin, LOW);
-    digitalWrite(SteeringInput2Pin, HIGH);
+    steeringDirection = SteeringDirection::Right;
 
-    // steeringActive = true;
-    // steeringStartedAt = millis();
+    applyMovement();
 }
 
 void MotorController::centerSteering()
 {
-    digitalWrite(SteeringInput1Pin, LOW);
-    digitalWrite(SteeringInput2Pin, LOW);
+    steeringDirection = SteeringDirection::Center;
 
-    // steeringActive = true;
+    applyMovement();
 }
 
-// void MotorController::updateSteering()
-// {
-//     if (!steeringActive)
-//         return;
+void MotorController::coast()
+{
+    driveDirection = DriveDirection::Neutral;
+    steeringDirection = SteeringDirection::Center;
 
-//     if (millis() - steeringStartedAt >= SteeringPulseTimeMs)
-//     {
-//         centerSteering();
-//     }
-// }
+    setLeftMotor(0);
+    setRightMotor(0);
+}
+
+void MotorController::emergencyBrake()
+{
+    driveDirection = DriveDirection::Neutral;
+    steeringDirection = SteeringDirection::Center;
+
+    brakeMotor(
+        LeftInput1Pin,
+        LeftInput2Pin,
+        LeftEnablePin);
+
+    brakeMotor(
+        RightInput1Pin,
+        RightInput2Pin,
+        RightEnablePin);
+}
+
+void MotorController::setDriveSpeed(uint8_t speed)
+{
+    driveSpeed = speed;
+
+    applyMovement();
+}
+
+void MotorController::applyMovement()
+{
+    if (steeringDirection == SteeringDirection::Left)
+    {
+        setLeftMotor(-driveSpeed);
+        setRightMotor(driveSpeed);
+
+        return;
+    }
+
+    if (steeringDirection == SteeringDirection::Right)
+    {
+        setLeftMotor(driveSpeed);
+        setRightMotor(-driveSpeed);
+
+        return;
+    }
+
+    if (driveDirection == DriveDirection::Forward)
+    {
+        setLeftMotor(driveSpeed);
+        setRightMotor(driveSpeed);
+
+        return;
+    }
+
+    if (driveDirection == DriveDirection::Backward)
+    {
+        setLeftMotor(-driveSpeed);
+        setRightMotor(-driveSpeed);
+
+        return;
+    }
+
+    setLeftMotor(0);
+    setRightMotor(0);
+}
+
+void MotorController::setLeftMotor(int16_t speed)
+{
+    setMotor(
+        LeftInput1Pin,
+        LeftInput2Pin,
+        LeftEnablePin,
+        speed,
+        LeftMotorReversed);
+}
+
+void MotorController::setRightMotor(int16_t speed)
+{
+    setMotor(
+        RightInput1Pin,
+        RightInput2Pin,
+        RightEnablePin,
+        speed,
+        RightMotorReversed);
+}
+
+void MotorController::setMotor(
+    uint8_t in1Pin,
+    uint8_t in2Pin,
+    uint8_t enablePin,
+    int16_t speed,
+    bool reversed)
+{
+    speed = constrain(speed, -255, 255);
+
+    if (reversed)
+    {
+        speed = -speed;
+    }
+
+    if (speed > 0)
+    {
+        digitalWrite(in1Pin, HIGH);
+        digitalWrite(in2Pin, LOW);
+
+        analogWrite(enablePin, speed);
+    }
+    else if (speed < 0)
+    {
+        digitalWrite(in1Pin, LOW);
+        digitalWrite(in2Pin, HIGH);
+
+        analogWrite(enablePin, -speed);
+    }
+    else
+    {
+        digitalWrite(in1Pin, LOW);
+        digitalWrite(in2Pin, LOW);
+
+        analogWrite(enablePin, 0);
+    }
+}
+
+void MotorController::brakeMotor(
+    uint8_t in1Pin,
+    uint8_t in2Pin,
+    uint8_t enablePin)
+{
+    digitalWrite(in1Pin, LOW);
+    digitalWrite(in2Pin, LOW);
+
+    analogWrite(enablePin, 255);
+}
