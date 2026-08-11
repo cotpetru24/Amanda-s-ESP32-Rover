@@ -295,11 +295,21 @@ void loop()
             break;
 
         case NavigationDirection::None:
-            Serial.println("No safe direction available");
+            Serial.println("No safe direction - turning 180 degrees");
 
             motorController.emergencyBrake();
-            canStart = false;
-            autonomousMode = false;
+
+            motorController.steerLeft();
+
+            //-----------IMPORTANT----------------
+            //adjust the delay after testing and use millis ()
+            delay(1000);
+
+            motorController.emergencyBrake();
+
+            scanResultsPrinted = false;
+            navigationController.startScan();
+
             break;
         }
     }
