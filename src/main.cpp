@@ -131,7 +131,6 @@ void processCommand(char command)
         autonomousMode = false;
         navigationController.begin();
 
-
         scannerServoController.faceLeft();
         motorController.steerLeft();
 
@@ -329,7 +328,7 @@ void loop()
             motorController.steerLeft();
 
             //-----------IMPORTANT----------------
-            //adjust the delay after testing and use millis ()
+            // adjust the delay after testing and use millis ()
             delay(1000);
 
             motorController.emergencyBrake();
@@ -340,3 +339,4 @@ void loop()
             break;
         }
     }
+}
