@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "NavigationController.h"
 
+
 NavigationController ::NavigationController(ScannerServoController &scannerServoController, UltrasonicController &ultrasonicController)
     : scannerServo(scannerServoController), ultrasonic(ultrasonicController)
 {
@@ -73,7 +74,7 @@ void NavigationController::update()
 };
 
 bool NavigationController::isScanning() const
-{
+{  
     return state == ScanState::WaitingForRight ||
            state == ScanState::WaitingForLeft ||
            state == ScanState::WaitingForFront ||

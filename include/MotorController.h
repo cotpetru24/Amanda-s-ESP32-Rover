@@ -13,7 +13,7 @@ public:
 
     void steerLeft();
     void steerRight();
-    void centerSteering();
+    void stopSteering();
 
     void coast();
     void emergencyBrake();

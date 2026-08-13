@@ -24,5 +24,5 @@ private:
 
     Adafruit_SSD1306 display { ScreenWidth, ScreenHeight, &Wire, ResetPin };
 
-    bool initialized = false;
+    bool initialised = false;
 };

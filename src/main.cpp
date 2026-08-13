@@ -5,6 +5,7 @@
 #include "ScannerServoController.h"
 #include "NavigationController.h"
 #include "StartButtonController.h"
+#include "DisplayController.h"
 
 BluetoothController bluetoothController;
 MotorController motorController;
@@ -12,6 +13,7 @@ UltrasonicController ultrasonicController;
 ScannerServoController scannerServoController;
 NavigationController navigationController(scannerServoController, ultrasonicController);
 StartButtonController startButtonController;
+DisplayController displayController;
 
 // Rover state
 bool canStart = false;
@@ -43,6 +45,7 @@ void startAutonomousCountdown()
 
     motorController.emergencyBrake();
 
+    displayController.showMessage("AUTO", "STARTING...");
     Serial.println("Autonomous mode starts in 5 seconds");
 }
 
@@ -92,6 +95,8 @@ void processCommand(char command)
 
         scannerServoController.faceFront();
         motorController.driveForward();
+
+        displayController.showMessage("MANUAL", "FORWARD");
         Serial.println("Driving forward");
         break;
 
@@ -99,12 +104,16 @@ void processCommand(char command)
         canStart = true;
         autonomousCountdownActive = false;
         autonomousMode = false;
+        navigationController.begin();
 
         motorController.driveBackward();
+
+        displayController.showMessage("MANUAL", "BACKWARD");
         Serial.println("Driving backward");
         break;
 
     case 'N':
+        autonomousCountdownActive = false;
         autonomousMode = false;
         navigationController.begin();
         motorController.coast();
@@ -120,9 +129,13 @@ void processCommand(char command)
         canStart = true;
         autonomousCountdownActive = false;
         autonomousMode = false;
+        navigationController.begin();
+
 
         scannerServoController.faceLeft();
         motorController.steerLeft();
+
+        displayController.showMessage("MANUAL", "TURNING LEFT");
         Serial.println("Steering left");
         break;
 
@@ -130,22 +143,30 @@ void processCommand(char command)
         canStart = true;
         autonomousCountdownActive = false;
         autonomousMode = false;
+        navigationController.begin();
 
         scannerServoController.faceRight();
         motorController.steerRight();
+
+        displayController.showMessage("MANUAL", "TURNING RIGHT");
         Serial.println("Steering right");
         break;
 
     case 'C':
+        autonomousCountdownActive = false;
         autonomousMode = false;
         navigationController.begin();
 
-        motorController.centerSteering();
+        motorController.stopSteering();
+
+        displayController.showMessage("MANUAL", "STRIGHT");
         Serial.println("Centering steering");
         break;
 
     default:
         Serial.print("Unknown command: ");
+        char commandText[2] = {command, '\0'};
+        displayController.showMessage(commandText, "UNKNOWN COMMAND");
         Serial.println(command);
     }
 }
@@ -170,6 +191,8 @@ void enforceObstacleSafety()
 
     if (navigationController.isObstacleClose(distance))
     {
+        displayController.showMessage("AUTO", "OBSTACLE");
+
         motorController.emergencyBrake();
 
         Serial.println("Obstacle too close - rover stopped");
@@ -177,6 +200,9 @@ void enforceObstacleSafety()
         if (autonomousMode)
         {
             scanResultsPrinted = false;
+
+            displayController.showMessage("AUTO", "SCANNING...");
+
             navigationController.startScan();
 
             Serial.println("Scanning for a clear direction");
@@ -192,6 +218,7 @@ void setup()
 {
     Serial.begin(115200);
 
+    displayController.begin();
     startButtonController.begin();
     ultrasonicController.begin();
     motorController.begin();

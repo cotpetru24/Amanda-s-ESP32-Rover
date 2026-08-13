@@ -43,7 +43,7 @@ void MotorController::steerRight()
     applyMovement();
 }
 
-void MotorController::centerSteering()
+void MotorController::stopSteering()
 {
     steeringDirection = SteeringDirection::Center;
 
