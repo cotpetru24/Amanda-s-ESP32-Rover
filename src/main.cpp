@@ -353,6 +353,7 @@ void loop()
 
             //-----------IMPORTANT----------------
             // adjust the delay after testing and use millis ()
+            // adjust the delay after testing and use millis ()
             delay(1000);
 
             motorController.emergencyBrake();
