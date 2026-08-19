@@ -16,8 +16,8 @@ private:
     static constexpr int ScreenWidth = 128;
     static constexpr int ScreenHeight = 64;
 
-    static constexpr int SdaPin = 18;
-    static constexpr int SclPin = 19;
+    static constexpr int SdaPin = 21;
+    static constexpr int SclPin = 22;
 
     static constexpr int ResetPin = -1;
     static constexpr uint8_t DisplayAddress = 0x3C;

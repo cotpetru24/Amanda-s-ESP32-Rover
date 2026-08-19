@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "NavigationController.h"
-
+#include "DisplayController.h"
 
 NavigationController ::NavigationController(ScannerServoController &scannerServoController, UltrasonicController &ultrasonicController)
     : scannerServo(scannerServoController), ultrasonic(ultrasonicController)

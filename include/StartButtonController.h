@@ -8,7 +8,7 @@ public:
     bool wasPressed();
 
 private:
-    static constexpr int StartButtonPin = 23;
+    static constexpr int StartButtonPin = 35;
     static constexpr unsigned long DebounceTimeMs = 50;
 
     bool previousRawState = true;

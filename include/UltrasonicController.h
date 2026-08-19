@@ -7,8 +7,8 @@ public:
     float getDistanceCentimetres();
 
 private:
-    static constexpr int TriggerPin = 21;
-    static constexpr int EchoPin = 35;
+    static constexpr int TriggerPin = 4;
+    static constexpr int EchoPin = 34;
 
     static constexpr unsigned long EchoTimeoutMicroseconds = 30000;
 };

@@ -16,7 +16,7 @@ public:
     int getCurrentAngle() const;
 
 private:
-    static constexpr int ServoPin = 13;
+    static constexpr int ServoPin = 14;
 
     static constexpr int LeftAngle = 45;
     static constexpr int CentreAngle = 90;

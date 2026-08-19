@@ -3,7 +3,7 @@
 
 void StartButtonController::begin()
 {
-    pinMode(StartButtonPin, INPUT_PULLUP);
+    pinMode(StartButtonPin, INPUT);
 
     previousRawState = digitalRead(StartButtonPin);
     stableState = previousRawState;

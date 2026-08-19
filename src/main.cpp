@@ -6,6 +6,7 @@
 #include "NavigationController.h"
 #include "StartButtonController.h"
 #include "DisplayController.h"
+#include "AudioController.h"
 
 BluetoothController bluetoothController;
 MotorController motorController;
@@ -14,6 +15,7 @@ ScannerServoController scannerServoController;
 NavigationController navigationController(scannerServoController, ultrasonicController);
 StartButtonController startButtonController;
 DisplayController displayController;
+AudioController audioController;
 
 // Rover state
 bool canStart = false;
@@ -131,7 +133,6 @@ void processCommand(char command)
         autonomousMode = false;
         navigationController.begin();
 
-
         scannerServoController.faceLeft();
         motorController.steerLeft();
 
@@ -192,6 +193,7 @@ void enforceObstacleSafety()
     if (navigationController.isObstacleClose(distance))
     {
         displayController.showMessage("AUTO", "OBSTACLE");
+        audioController.playSound(2); // obstacle detected sound
 
         motorController.emergencyBrake();
 
@@ -225,6 +227,9 @@ void setup()
     scannerServoController.begin();
     navigationController.begin();
 
+    audioController.begin();
+    audioController.playSound(1); // play startup sound
+
     bluetoothController.begin("Amanda-Rover");
 
     stopRover();
@@ -234,6 +239,8 @@ void setup()
 void loop()
 {
     handleStartButton();
+
+    audioController.update();
 
     if (bluetoothController.hasCommand())
     {
@@ -253,6 +260,22 @@ void loop()
 
     navigationController.update();
 
+    if (navigationController.isScanComplete())
+    {
+        const ScanResult result = navigationController.getScanResult();
+
+        char message[64];
+
+        snprintf(
+            message,
+            sizeof(message),
+            "L: %.0f cm\nF: %.0f cm\nR: %.0f cm",
+            result.leftDistance,
+            result.frontDistance,
+            result.rightDistance);
+
+        displayController.showMessage("Scan result:", message);
+    }
     static unsigned long lastMeasuredTime = 0;
 
     // after debugging change to 40ms
@@ -329,7 +352,7 @@ void loop()
             motorController.steerLeft();
 
             //-----------IMPORTANT----------------
-            //adjust the delay after testing and use millis ()
+            // adjust the delay after testing and use millis ()
             delay(1000);
 
             motorController.emergencyBrake();
@@ -340,3 +363,4 @@ void loop()
             break;
         }
     }
+}

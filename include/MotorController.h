@@ -35,13 +35,13 @@ private:
         Right
     };
 
-    static constexpr int LeftInput1Pin = 27;
-    static constexpr int LeftInput2Pin = 26;
-    static constexpr int LeftEnablePin = 25;
+    static constexpr int LeftInput1Pin = 26;   // AIN1
+    static constexpr int LeftInput2Pin = 27;   // AIN2
+    static constexpr int LeftEnablePin = 25;   // PWMA
 
-    static constexpr int RightInput1Pin = 32;
-    static constexpr int RightInput2Pin = 33;
-    static constexpr int RightEnablePin = 14;
+    static constexpr int RightInput1Pin = 32;  // BIN1
+    static constexpr int RightInput2Pin = 13;  // BIN2
+    static constexpr int RightEnablePin = 33;  // PWMB
 
     static constexpr bool LeftMotorReversed = false;
     static constexpr bool RightMotorReversed = false;

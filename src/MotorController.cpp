@@ -182,8 +182,8 @@ void MotorController::brakeMotor(
     uint8_t in2Pin,
     uint8_t enablePin)
 {
-    digitalWrite(in1Pin, LOW);
-    digitalWrite(in2Pin, LOW);
+    digitalWrite(in1Pin, HIGH); //set low for coast
+    digitalWrite(in2Pin, HIGH); //set low for coast
 
     analogWrite(enablePin, 255);
 }
