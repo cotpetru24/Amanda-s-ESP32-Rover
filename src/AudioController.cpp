@@ -5,7 +5,7 @@ void AudioController::begin()
     audioSerial.begin(9600, SERIAL_8N1, RxPin, TxPin);
 
     if(!player.begin(audioSerial)) return;
-    player.volume(20);
+    player.volume(80);
 }
 
 void AudioController::update()
