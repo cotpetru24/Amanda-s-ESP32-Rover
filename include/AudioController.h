@@ -9,10 +9,10 @@ public:
     void begin();
     void update();
 
-    void playSound(int trackNumber, unsigned long playDrationMs = 0);
+    void playSound(int trackNumber, unsigned long playDurationMs = 0);
 
 private:
-    static constexpr int TxPin = 5;
+    static constexpr int TxPin = 17;
     static constexpr int RxPin = 36;
 
     HardwareSerial audioSerial{1};
@@ -21,4 +21,4 @@ private:
     bool timedPlaybackActive = false;
     unsigned long playbackStartedAt = 0;
     unsigned long playbackDurationMs = 0;
-}
+};
