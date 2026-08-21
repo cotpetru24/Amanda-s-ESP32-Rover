@@ -84,6 +84,18 @@ void handleStartButton()
 
     startAutonomousCountdown();
 }
+void showCurrentTrack()
+{
+    char message[20];
+
+    snprintf(
+        message,
+        sizeof(message),
+        "TRACK: %d",
+        audioController.getCurrentTrackNumber());
+
+    displayController.showMessage("MUSIC", message);
+}
 
 void processCommand(char command)
 {
@@ -160,8 +172,68 @@ void processCommand(char command)
 
         motorController.stopSteering();
 
-        displayController.showMessage("MANUAL", "STRIGHT");
-        Serial.println("Centering steering");
+        displayController.showMessage("MANUAL", "STRAIGHT");
+        Serial.println("Stop steering");
+        break;
+
+    // Play       → P
+    // Pause      → Q
+    // Stop       → X
+    // Next       → ]
+    // Previous   → [
+    // Volume +   → +
+    // Volume -   → -
+    case 'P':
+        audioController.resume();
+
+        showCurrentTrack();
+
+        Serial.print("Playing track: ");
+        Serial.println(audioController.getCurrentTrackNumber());
+        break;
+
+    case 'Q':
+        audioController.pause();
+
+        displayController.showMessage("MUSIC", "PAUSED");
+        Serial.println("Music paused");
+        break;
+
+    case 'X':
+        audioController.stopPlay();
+
+        displayController.showReady();
+        Serial.println("Music stopped");
+        break;
+
+    case ']':
+        audioController.playNext();
+
+        showCurrentTrack();
+
+        Serial.print("Next track: ");
+        Serial.println(audioController.getCurrentTrackNumber());
+        break;
+
+    case '[':
+        audioController.playPrevious();
+
+        showCurrentTrack();
+
+        Serial.print("Previous track: ");
+        Serial.println(audioController.getCurrentTrackNumber());
+        break;
+
+    case '+':
+        audioController.volumeUp();
+
+        Serial.println("Volume up");
+        break;
+
+    case '-':
+        audioController.volumeDown();
+
+        Serial.println("Volume down");
         break;
 
     default:
@@ -215,6 +287,7 @@ void enforceObstacleSafety()
         }
     }
 }
+
 
 void setup()
 {
